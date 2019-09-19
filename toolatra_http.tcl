@@ -286,3 +286,6 @@ proc header {name text} {
 	dict set _toolatra_http_response $name $text
 }
 
+proc cookie {name val} {
+	header Set-Cookie "$name=$val"
+}
