@@ -1,0 +1,139 @@
+= Toolatra
+
+The simplicity of Sinatra brought to Tcl.
+
+[source,tcl]
+----
+source toolatra_http.tcl
+
+get / {
+	show "Good morning!"
+}
+
+run
+----
+
+
+*Toolatra* is a micro web framework that is very similar to Sinatra, but is ported to Tcl.
+
+== What does it have?
+[squares]
+- Sinatra-like syntax
+- Minimalistic templates
+- Built-in web server that integrates easily with Nginx or Apache
+
+== Installation
+Toolatra has an installation method similar to TXLib's: just copy "toolatra_http.tcl" and (optionally) "toolatra_templates.tcl" to the folder with your project and enjoy writing Tcl web apps in Toolatra!
+
+== Usage
+Handling a GET request to a specific path:
+
+[source,tcl]
+----
+source toolatra_http.tcl
+
+get / {
+	show {Hello there, stranger!}
+}
+
+run
+----
+
+If you save and run this file with tclsh and then go to http://127.0.0.1:5050, you should see ``Hello there, stranger!``.
+
+_SPOILER!_ Specifying the port number on which the server should be ran to the ``run`` command will start Toolatra's server on that port.
+
+Throwing HTTP errors:
+
+[source,tcl]
+----
+source toolatra_http.tcl
+
+get /this-will-cause-an-error {
+	error 404
+}
+
+run
+----
+
+
+By default, Toolatra's ugly error handler will be used. To replace it with a custom one, just define a GET request handler with the path set to ``/<HTML error code here>``. Example:
+
+[source,tcl]
+----
+source toolatra_http.tcl
+
+get /404 {
+	show "Whoops, an error has occured."
+}
+
+get /this-will-cause-an-error {
+	error 404
+}
+
+run
+----
+
+Serving additional headers:
+
+[source,tcl]
+----
+source toolatra_http.tcl
+
+get / {
+	header Content-type text/plain
+	show {Look, I'm plain text!}
+}
+
+run
+----
+
+Using templates:
+
+[source,tcl]
+----
+source toolatra_http.tcl
+
+get / {
+	etcl index.html [dict create name Tim]
+}
+
+run
+----
+
+Example contents of ``index.html`` (it must be located in ``templates`` folder):
+
+[source,html]
+----
+<h1>Hello there, @name@!</h1>
+<p>Did you know that I can run Tcl code from here? Just look: 2 + 2 = @expr {2+2}@</p>
+----
+
+Accessing query string parameters:
+
+[source,tcl]
+-----
+source toolatra_http.tcl
+
+get / {
+	if {[dict exists $params name]} {
+		show "Hello, [dict get $params name]!"
+	} else {
+		etcl form.html
+	}
+}
+
+run
+-----
+
+``form.html`` template:
+
+[source,html]
+----
+<form method=GET action=/>
+<p>Your name: <input type="text" name=name /></p> <button type=submit>Greet me!</button>
+</form>
+----
+
+== License
+As always, MIT License.
