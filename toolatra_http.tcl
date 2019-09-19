@@ -72,7 +72,7 @@ proc _toolatra_server_error {url message} {
 
 proc _toolatra_has_qs {url} {
 	for {set index 0 } { $index < [string length $url] } { incr index } {
-		if {[string index $url $index] == "?"} {
+ 		if {[string index $url $index] == "?"} {
 			return 1
 		}
 	}
@@ -101,16 +101,35 @@ proc _toolatra_server_mimetypefn {fn} {
 	}
 }
 
+proc _toolatra_tclext_nolast {lst} {
+	return [string range $lst 0 [expr {[string length $lst] - 2}]]
+}
+
+proc _toolatra_server_collectheaders {sockt} {
+	set result [dict create]
+	while {! [catch {gets $sockt rqctnt}]} {
+		if {[string length $rqctnt] < 3} {
+			break
+		}
+		set splitrq [split $rqctnt :]
+		dict set result [_toolatra_tclext_nolast [lindex $rqctnt 0]] [string trim [lindex $rqctnt 1]]
+	}
+	return $result
+}
+
 proc _toolatra_server_processrequest {sock addr time} {
 	global _toolatra_http_response
 	set _toolatra_http_response [dict create sender $addr when $time]
 	puts ------------------------------------------------------
 	puts "Processing incoming connection by $addr on [clock format $time -format {%Y-%m-%d %H:%M:%S}]"
+	set headersDict [dict create]
 	if {[eof $sock] || [catch {gets $sock rqctnt}]} {
 		close $sock
 		puts "Connection closed"
 	} else {
 		puts "Connection kept open"
+		set headersDict [_toolatra_server_collectheaders $sock]
+		puts $headersDict
 	}
 	set requestSplit [split $rqctnt { }]
 	if {[llength $requestSplit] < 3} {
@@ -122,8 +141,8 @@ proc _toolatra_server_processrequest {sock addr time} {
 	set requestType [lindex $requestSplit 0]
 	set requestUrl [lindex $requestSplit 1]
 	set requestHttp [lindex $requestSplit 2]
-	set params [dict create]
-	if {[_toolatra_has_qs $requestUrl] >= -1} {
+	set params $headersDict
+	if {[_toolatra_has_qs $requestUrl]} {
 		puts "(Query string CGI parameters specified)"
 		set paramsStr [lindex [split $requestUrl ?] 1]
 		set requestUrl [lindex [split $requestUrl ?] 0]
