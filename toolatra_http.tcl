@@ -288,4 +288,14 @@ proc header {name text} {
 
 proc cookie {name val} {
 	header Set-Cookie "$name=$val"
+	return $val
+}
+
+proc redirect {url} {
+	global _toolatra_http_response
+	dict set _toolatra_http_response Content-type text/html
+	dict set _toolatra_http_response Location $url
+	dict set _toolatra_http_response URI $url
+	dict set _toolatra_http_response toolatra_ctnt "If you aren't getting redirected, click <a href=\"$url\">here</a>."
+	dict set _toolatra_http_response error 302
 }
