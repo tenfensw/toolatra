@@ -135,5 +135,36 @@ run
 </form>
 ----
 
+Accessing header values:
+
+[source,tcl]
+----
+source toolatra_http.tcl
+
+get / {
+	if {[dict exists $params Cookie]} {
+		show [dict get $params Cookie]
+	} else {
+		cookie RandomValue [expr {rand() * 9999}]
+	}
+}
+
+run
+----
+
+Redirecting to other pages:
+
+[source,tcl]
+----
+source toolatra_http.tcl
+
+get / {
+	redirect http://example.com
+}
+
+
+run
+----
+
 == License
 As always, MIT License.
