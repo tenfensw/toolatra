@@ -2,6 +2,7 @@ set _toolatra_http_requesthandlers {}
 set _toolatra_http_response [dict create]
 set _toolatra_version_major 9
 set _toolatra_version_minor 1
+set _toolatra_http_responsenohandle -1
 
 proc _toolatra_http_evalrequest {type url} {
 	global _toolatra_http_requesthandlers
@@ -62,11 +63,16 @@ proc _toolatra_has_request {type url} {
 
 
 proc _toolatra_server_error {url message} {
-	set result "<html><head><title>Toolatra framework error</title></head>"
-	set result "$result<body><h1 style=\"color: red\">Toolatra Server Error</h1>"
-	set result "$result<p><b>URL:</b> $url</p>"
-	set result "$result<p><b>Error:</b> $message</p>"
-	set result "$result<br><p>An error that is specified above has occured while processing your request. You should contact the developers of this application if you know that this has worked previously.</p></body></html>"
+	global _toolatra_http_responsenohandle
+	if {$_toolatra_http_responsenohandle == -1} {
+		set result "<html><head><title>Toolatra framework error</title></head>"
+		set result "$result<body><h1 style=\"color: red\">Toolatra Server Error</h1>"
+		set result "$result<p><b>URL:</b> $url</p>"
+		set result "$result<p><b>Error:</b> $message</p>"
+		set result "$result<br><p>An error that is specified above has occured while processing your request. You should contact the developers of this application if you know that this has worked previously.</p></body></html>"
+	} else {
+		set result [string map [list {@message@} $message {@url} $url] $_toolatra_http_responsenohandle]
+	}
 	return $result
 }
 
@@ -298,4 +304,14 @@ proc redirect {url} {
 	dict set _toolatra_http_response URI $url
 	dict set _toolatra_http_response toolatra_ctnt "If you aren't getting redirected, click <a href=\"$url\">here</a>."
 	dict set _toolatra_http_response error 302
+}
+
+proc unhandled_show {what} {
+	global _toolatra_http_responsenohandle
+	set _toolatra_http_responsenohandle $what
+}
+
+if {[info exists argv0] && $argv0 == [info script]} {
+	puts "Toolatra must be included from a Tcl script and cannot be run as a standalone script itself, because it is a framework, not a fully-featured program."
+	exit 1
 }
