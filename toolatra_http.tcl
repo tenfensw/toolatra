@@ -276,6 +276,9 @@ proc render {content {mimetype text/html}} {
 }
 
 proc run {{port 5050}} {
+	if {[info exists ::env(TOOLATRA_FORCEDPORT)]} {
+		set port $::env(TOOLATRA_FORCEDPORT)
+	}
 	_toolatra_server_kickstart $port
 }
 
@@ -295,6 +298,10 @@ proc header {name text} {
 proc cookie {name val} {
 	header Set-Cookie "$name=$val"
 	return $val
+}
+
+proc too {} {
+	
 }
 
 proc redirect {url} {
