@@ -1,3 +1,5 @@
+image::logo.png[]
+
 = Toolatra
 
 The simplicity of Sinatra brought to Tcl.

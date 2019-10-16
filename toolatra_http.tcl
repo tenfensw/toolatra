@@ -1,7 +1,7 @@
 set _toolatra_http_requesthandlers {}
 set _toolatra_http_response [dict create]
-set _toolatra_version_major 9
-set _toolatra_version_minor 1
+set _toolatra_version_major 19
+set _toolatra_version_minor 10
 set _toolatra_http_responsenohandle -1
 
 proc _toolatra_http_evalrequest {type url} {
@@ -14,15 +14,7 @@ proc _toolatra_http_evalrequest {type url} {
 	return ?
 }
 
-proc _toolatra_server_welcome {} {
-	set content "<html><head><title>Welcome to Toolatra!</title></head><body style=\"font-family: Helvetica Arial sans;\">"
-	set content "$content<center><img src=\"http://www.tcl.tk/images/tclp.gif\" /><h2>Welcome to Toolatra!</h2>"
-	set content "$content<p>Congratulations! It appears that you've successfully installed Toolatra and that everything seems to be fine.</p>"
-	set content "$content<p>Now that you've tested that everything is working file, add some pages to your web app.</p>"
-	set content "$content<p>Consult the <a href=\"http://timkoi.gitlab.io/toolatra/tutorial\">Toolatra tutorial</a> for more info.</p>"
-	set content "$content</center></body></html>"
-	return $content
-}
+
 
 proc _toolatra_server_finderror {errc} {
 	set errorCodes [dict create 200 OK 302 "Moved Temporarily" 301 "Moved Permenently" 500 "Internal Server Error" 400 "Bad Request" 404 "Not Found" 403 Forbidden]
@@ -234,11 +226,14 @@ proc _toolatra_server_processrequest {sock addr time} {
 			puts $sock $hdr
 		}
 	} elseif {$requestUrl == "/" && $requestType == "GET"} {
-		puts $sock "HTTP/1.1 200 OK"
-		puts $sock "Content-type: text/html"
+		puts $sock "HTTP/1.1 302 Moved Temporarily"
+		puts $sock "Content-type: text/plain"
+		puts $sock "X-ToolatraFramework-FirstRun: 1"
+		puts $sock "Location: http://timkoi.gitlab.io/toolatra/welcome"
+		puts $sock "URI: http://timkoi.gitlab.io/toolatra/welcome"
 		puts $sock "Connection: close"
 		puts $sock ""
-		puts $sock [_toolatra_server_welcome]
+		puts $sock "If you are not being redirected, manually go to http://timkoi.gitlab.io/toolatra/welcome"
 	} else {
 		puts "No handler for request $requestUrl ($requestType), returning an error."
 		puts $sock "HTTP/1.1 404 Not Found"
