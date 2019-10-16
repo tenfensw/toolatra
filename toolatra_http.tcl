@@ -25,7 +25,7 @@ proc _toolatra_server_welcome {} {
 }
 
 proc _toolatra_server_finderror {errc} {
-	set errorCodes [dict create 200 OK 302 "Moved Temporarily" 301 "Moved Permenently" 500 "Internal Server Error" 401 "Bad Request" 404 "Not Found" 403 Forbidden]
+	set errorCodes [dict create 200 OK 302 "Moved Temporarily" 301 "Moved Permenently" 500 "Internal Server Error" 400 "Bad Request" 404 "Not Found" 403 Forbidden]
 	if {! [dict exists $errorCodes $errc]} {
 		error "HTTP error code not supported by Toolatra: $errc"
 	}
@@ -119,6 +119,17 @@ proc _toolatra_server_collectheaders {sockt} {
 		}
 		set splitrq [split $rqctnt :]
 		dict set result [_toolatra_tclext_nolast [lindex $rqctnt 0]] [string trim [lindex $rqctnt 1]]
+		
+	}
+	return $result
+}
+
+proc _toolatra_tclext_rmempty {listing} {
+	set result {}
+	foreach itm $listing {
+		if {[string length [string trim $itm]] >= 1} {
+			lappend result $itm
+		}
 	}
 	return $result
 }
@@ -184,6 +195,21 @@ proc _toolatra_server_processrequest {sock addr time} {
 	if {$requestHttp != "HTTP/1.1"} {
 		puts "Invalid HTTP version ($requestHttp), not handling it in any way."
 	} elseif {[_toolatra_has_request $requestType $requestUrl]} {
+		set rawData {}
+		if {$requestType == {POST}} {
+			set countOfChars 0
+			if {! [dict exists $params Content-Length]} {
+				puts "Invalid POST request without Content-Length, not reading any data."
+				return
+			} else {
+				set countOfChars [dict get $params Content-Length]
+				for {set tms 0} {$tms < $countOfChars} {incr tms} {
+					set fdata [read $sock 1]
+					set rawData "$rawData$fdata"
+				}
+			}
+		}
+		#set rawData [_toolatra_tclext_rmempty $rawData]
 		eval [_toolatra_http_evalrequest $requestType $requestUrl]
 		if {! [dict exists $_toolatra_http_response toolatra_ctnt]} {
 			dict set _toolatra_http_response toolatra_ctnt ""
@@ -300,9 +326,6 @@ proc cookie {name val} {
 	return $val
 }
 
-proc too {} {
-	
-}
 
 proc redirect {url} {
 	global _toolatra_http_response
