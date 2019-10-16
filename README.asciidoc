@@ -166,5 +166,22 @@ get / {
 run
 ----
 
+Handling POST requests with data:
+
+[source,tcl]
+----
+source toolatra_http.tcl
+
+post / {
+	render "Data sent: $rawData"
+}
+
+get / {
+	render "Params/headers sent: $params"
+}
+
+run
+----
+
 == License
 As always, MIT License.
