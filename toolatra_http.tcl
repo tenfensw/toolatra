@@ -22,8 +22,19 @@ proc _toolatra_http_evalrequest {type url} {
 	return ?
 }
 
+
 proc _toolatra_server_finderror {errc} {
-	set errorCodes [dict create 200 OK 201 Created 202 Accepted 204 No Content 302 "Moved Temporarily" 301 "Moved Permenently" 500 "Internal Server Error" 400 "Bad Request" 404 "Not Found" 403 Forbidden]
+	set errorCodes [dict create 200 OK \
+								201 Created \
+								202 Accepted \
+								204 {No Content} \
+								302 {Moved Temporarily} \
+								301 {Moved Permenently} \
+								500 {Internal Server Error} \
+								400 {Bad Request} \
+								404 {Not Found} \
+								403 Forbidden]
+	
 	if {! [dict exists $errorCodes $errc]} {
 		error "HTTP error code not supported by Toolatra: $errc"
 	}
@@ -131,6 +142,7 @@ proc _toolatra_tclext_rmempty {listing} {
 	}
 	return $result
 }
+
 
 proc _toolatra_server_processrequest {sock addr time} {
 	global _toolatra_http_response
