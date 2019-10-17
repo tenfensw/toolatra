@@ -1,3 +1,11 @@
+#!/usr/bin/env tclsh
+# Toolatra - Sinatra-like web microframework for Tcl 8.5/8.6
+# Copyright (C) Tim K/RoverAMD 2018-2019 <timprogrammer@rambler.ru>.
+# 
+# File: toolatra_templates.tcl
+# Description: Addon for Toolatra that allows rendering templates
+# License: MIT License
+
 proc _toolatra_varpingpong {vr} {
 	return $vr
 }
