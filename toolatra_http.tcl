@@ -14,10 +14,8 @@ proc _toolatra_http_evalrequest {type url} {
 	return ?
 }
 
-
-
 proc _toolatra_server_finderror {errc} {
-	set errorCodes [dict create 200 OK 302 "Moved Temporarily" 301 "Moved Permenently" 500 "Internal Server Error" 400 "Bad Request" 404 "Not Found" 403 Forbidden]
+	set errorCodes [dict create 200 OK 201 Created 202 Accepted 204 No Content 302 "Moved Temporarily" 301 "Moved Permenently" 500 "Internal Server Error" 400 "Bad Request" 404 "Not Found" 403 Forbidden]
 	if {! [dict exists $errorCodes $errc]} {
 		error "HTTP error code not supported by Toolatra: $errc"
 	}
@@ -147,7 +145,7 @@ proc _toolatra_server_processrequest {sock addr time} {
 		puts ------------------------------------------------------	
 		return		
 	}
-	set requestType [lindex $requestSplit 0]
+	set requestType [string toupper [lindex $requestSplit 0]]
 	set requestUrl [lindex $requestSplit 1]
 	set requestHttp [lindex $requestSplit 2]
 	set params $headersDict
@@ -188,10 +186,10 @@ proc _toolatra_server_processrequest {sock addr time} {
 		puts "Invalid HTTP version ($requestHttp), not handling it in any way."
 	} elseif {[_toolatra_has_request $requestType $requestUrl]} {
 		set rawData {}
-		if {$requestType == {POST}} {
+		if {$requestType != {GET}} {
 			set countOfChars 0
 			if {! [dict exists $params Content-Length]} {
-				puts "Invalid POST request without Content-Length, not reading any data."
+				puts "Invalid $requestType request without Content-Length, not reading any data."
 				return
 			} else {
 				set countOfChars [dict get $params Content-Length]
@@ -309,6 +307,10 @@ proc post {url handler} {
 
 proc put {url handler} {
 	_toolatra_request PUT $url $handler
+}
+
+proc delete {url handler} {
+	_toolatra_request DELETE $url $handler
 }
 
 proc header {name text} {
