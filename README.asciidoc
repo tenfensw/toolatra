@@ -29,9 +29,7 @@ run
 
 [source,bash]
 ----
-$ test ! -d $HOME/Library/Tcl && mkdir -v -p $HOME/Library/Tcl
-$ mkdir -v $HOME/Library/Tcl/toolatra
-$ cp -r -v *.tcl $HOME/Library/Tcl/toolatra/
+$ tclsh8.5 install-macos.tcl
 ----
 
 === On Ubuntu Linux
