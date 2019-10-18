@@ -6,7 +6,7 @@ The simplicity of Sinatra brought to Tcl.
 
 [source,tcl]
 ----
-source toolatra_http.tcl
+package require Toolatra
 
 get / {
 	show "Good morning!"
@@ -25,14 +25,31 @@ run
 - Built-in web server that integrates easily with Nginx or Apache
 
 == Installation
-Toolatra has an installation method similar to TXLib's: just copy "toolatra_http.tcl" and (optionally) "toolatra_templates.tcl" to the folder with your project and enjoy writing Tcl web apps in Toolatra!
+=== On macOS
+
+[source,bash]
+----
+$ test ! -d $HOME/Library/Tcl && mkdir -v -p $HOME/Library/Tcl
+$ mkdir -v $HOME/Library/Tcl/toolatra
+$ cp -r -v *.tcl $HOME/Library/Tcl/toolatra/
+----
+
+=== On Ubuntu Linux
+
+[source,bash]
+----
+$ sudo sh
+$ mkdir -v /usr/share/tcltk/toolatra
+$ cp -r -v *.tcl /usr/share/tcltk/toolatra/
+$ exit
+----
 
 == Usage
 Handling a GET request to a specific path:
 
 [source,tcl]
 ----
-source toolatra_http.tcl
+package require Toolatra
 
 get / {
 	show {Hello there, stranger!}
@@ -49,7 +66,7 @@ Throwing HTTP errors:
 
 [source,tcl]
 ----
-source toolatra_http.tcl
+package require Toolatra
 
 get /this-will-cause-an-error {
 	error 404
@@ -63,7 +80,7 @@ By default, Toolatra's ugly error handler will be used. To replace it with a cus
 
 [source,tcl]
 ----
-source toolatra_http.tcl
+package require Toolatra
 
 get /404 {
 	show "Whoops, an error has occured."
@@ -80,7 +97,7 @@ Serving additional headers:
 
 [source,tcl]
 ----
-source toolatra_http.tcl
+package require Toolatra
 
 get / {
 	header Content-type text/plain
@@ -94,7 +111,8 @@ Using templates:
 
 [source,tcl]
 ----
-source toolatra_http.tcl
+package require Toolatra
+package require ToolatraTemplates
 
 get / {
 	etcl index.html [dict create name Tim]
@@ -115,7 +133,8 @@ Accessing query string parameters:
 
 [source,tcl]
 -----
-source toolatra_http.tcl
+package require Toolatra
+package require ToolatraTemplates
 
 get / {
 	if {[dict exists $params name]} {
@@ -141,7 +160,7 @@ Accessing header values:
 
 [source,tcl]
 ----
-source toolatra_http.tcl
+package require Toolatra
 
 get / {
 	if {[dict exists $params Cookie]} {
@@ -158,7 +177,7 @@ Redirecting to other pages:
 
 [source,tcl]
 ----
-source toolatra_http.tcl
+package require Toolatra
 
 get / {
 	redirect http://example.com
@@ -172,7 +191,7 @@ Handling POST requests with data:
 
 [source,tcl]
 ----
-source toolatra_http.tcl
+package require Toolatra
 
 post / {
 	render "Data sent: $rawData"

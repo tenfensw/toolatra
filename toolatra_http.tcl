@@ -1,10 +1,14 @@
-#!/usr/bin/env tclsh
+#!/usr/bin/env tclshç
 # Toolatra - Sinatra-like web microframework for Tcl 8.5/8.6
 # Copyright (C) Tim K/RoverAMD 2018-2019 <timprogrammer@rambler.ru>.
 # 
 # File: toolatra_http.tcl
 # Description: Toolatra framework itself
 # License: MIT License
+
+if {[lsearch -exact [info globals] toolatraIsPackaged] < 0 || ! $toolatraIsPackaged} {
+	puts "IMPORTANT WARNING! Please notice that as of version 19.10.2, support for Tcl package command was added and so it is now recommended to use \"package require Toolatra\" instead of \"source toolatra_http.tcl\"."
+}
 
 set _toolatra_http_requesthandlers {}
 set _toolatra_http_response [dict create]
@@ -357,6 +361,10 @@ proc unhandled_show {what} {
 	global _toolatra_http_responsenohandle
 	set _toolatra_http_responsenohandle $what
 }
+
+
+package provide Toolatra $_toolatra_version_major.$_toolatra_version_minor
+package require Tcl 8.5
 
 if {[info exists argv0] && $argv0 == [info script]} {
 	puts "Toolatra must be included from a Tcl script and cannot be run as a standalone script itself, because it is a framework, not a fully-featured program."

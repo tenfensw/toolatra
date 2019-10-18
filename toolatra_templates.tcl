@@ -57,3 +57,6 @@ proc etcl {name {cntx -1}} {
 	show [_toolatra_template_load $name $cntx]
 }
 
+package provide ToolatraTemplates 19.10
+package require Toolatra 19.10
+package require Tcl 8.5
