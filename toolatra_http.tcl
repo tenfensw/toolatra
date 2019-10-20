@@ -15,11 +15,32 @@ set _toolatra_http_response [dict create]
 set _toolatra_version_major 19
 set _toolatra_version_minor 10
 set _toolatra_http_responsenohandle -1
+set _toolatra_http_mergeableUrlParams [dict create]
+
+proc _toolatra_tclext_urlmatch {url1 url2} {
+	global _toolatra_http_mergeableUrlParams
+	set _toolatra_http_mergeableUrlParams [dict create]
+	set splitCompared [split $url2 /]
+	set splitCurrent [split $url1 /]
+	if {[llength $splitCurrent] != [llength $splitCompared]} {
+		return 0
+	}
+	for {set index 0} {$index < [llength $splitCompared]} {incr index} {
+		set itm [lindex $splitCurrent $index]
+		set itmN [lindex $splitCompared $index]
+		if {[string length $itmN] > 0 && [string index $itmN 0] == {+}} {
+			dict set _toolatra_http_mergeableUrlParams [string range $itmN 1 end] $itm
+		} elseif {$itmN != $itm} {
+			return 0
+		}
+	}
+	return 1
+}
 
 proc _toolatra_http_evalrequest {type url} {
 	global _toolatra_http_requesthandlers
 	foreach rq $_toolatra_http_requesthandlers {
-		if {[lindex $rq 0] == $type && [lindex $rq 1] == $url} {
+		if {[lindex $rq 0] == $type && [_toolatra_tclext_urlmatch $url [lindex $rq 1]]} {
 			return [lindex $rq 2]
 		}
 	}
@@ -210,6 +231,9 @@ proc _toolatra_server_processrequest {sock addr time} {
 		puts "Invalid HTTP version ($requestHttp), not handling it in any way."
 	} elseif {[_toolatra_has_request $requestType $requestUrl]} {
 		set rawData {}
+		global _toolatra_http_mergeableUrlParams
+		set params [dict merge $params $_toolatra_http_mergeableUrlParams]
+		set _toolatra_http_mergeableUrlParams [dict create]
 		if {$requestType != {GET}} {
 			set countOfChars 0
 			if {! [dict exists $params Content-Length]} {
