@@ -175,6 +175,7 @@ proc _toolatra_server_processrequest {sock addr time} {
 	puts ------------------------------------------------------
 	puts "Processing incoming connection by $addr on [clock format $time -format {%Y-%m-%d %H:%M:%S}]"
 	set headersDict [dict create]
+	chan configure $sock -encoding utf-8
 	if {[eof $sock] || [catch {gets $sock rqctnt}]} {
 		close $sock
 		puts "Connection closed"
@@ -320,7 +321,7 @@ proc get {url handler} {
 	_toolatra_request GET $url $handler
 }
 
-proc show {content {mimetype text/html}} {
+proc show {content {mimetype {text/html; charset=utf-8}}} {
 	global _toolatra_http_response
 	if {! [dict exists $_toolatra_http_response toolatra_ctnt]} {
 		dict set _toolatra_http_response toolatra_ctnt ""
@@ -338,7 +339,7 @@ proc error {errc} {
 	status $errc
 }
 
-proc render {content {mimetype text/html}} {
+proc render {content {mimetype {text/html; charset=utf-8}}} {
 	show $content $mimetype
 }
 
