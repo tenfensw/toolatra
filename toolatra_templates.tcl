@@ -10,7 +10,7 @@ proc _toolatra_varpingpong {vr} {
 	return $vr
 }
 
-proc _toolatra_template_load {tname {context -1}} {
+proc _toolatra_template_load {relPath {context -1}} {
 	if {$context != -1} {
 		dict for {key val} $context {
 			set $key $val
@@ -18,10 +18,6 @@ proc _toolatra_template_load {tname {context -1}} {
 	}
 	foreach key [info globals] {
 		global $key
-	}
-	set relPath [pwd]/templates/$tname
-	if {! [file exists $relPath]} {
-		error "No such file or directory - \"$relPath\"."
 	}
 	set desc [open $relPath r]
 	set contents [read $desc]
@@ -36,6 +32,9 @@ proc _toolatra_template_load {tname {context -1}} {
 				set insideEval 0
 				if {[info exists $tmpEval]} {
 					set result "$result[eval "_toolatra_varpingpong \$$tmpEval"]"
+				} elseif {[string index $tmpEval 0] == {!}} {
+					set substrTmpEval [string trim [string range $tmpEval 1 end]]
+					set result "$result[layout $substrTmpEval $context]"
 				} else {
 					set result "$result[eval $tmpEval]"
 				}
@@ -53,10 +52,24 @@ proc _toolatra_template_load {tname {context -1}} {
 	return $result
 }
 
-proc etcl {name {cntx -1}} {
-	show [_toolatra_template_load $name $cntx]
+proc layout {name {cntx -1}} {
+	set layoutsDir "[pwd]/layouts"
+	set lt "$layoutsDir/$name"
+	if {! [file exists $lt]} {
+		return "No such file or directory - \"$lt\" (layout: $name)."
+	} else {
+		return [_toolatra_template_load $lt $cntx]
+	}
 }
 
-package provide ToolatraTemplates 19.10
+proc etcl {name {cntx -1}} {
+	set relPath [pwd]/templates/$name
+	if {! [file exists $relPath]} {
+		error "No such file or directory - \"$relPath\"."
+	}
+	show [_toolatra_template_load $relPath $cntx]
+}
+
+package provide ToolatraTemplates 19.11
 package require Toolatra 19.10
 package require Tcl 8.5

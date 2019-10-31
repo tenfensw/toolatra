@@ -13,7 +13,7 @@ if {[lsearch -exact [info globals] toolatraIsPackaged] < 0 || ! $toolatraIsPacka
 set _toolatra_http_requesthandlers {}
 set _toolatra_http_response [dict create]
 set _toolatra_version_major 19
-set _toolatra_version_minor 10
+set _toolatra_version_minor 11
 set _toolatra_http_responsenohandle -1
 set _toolatra_http_mergeableUrlParams [dict create]
 
