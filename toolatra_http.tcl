@@ -242,10 +242,8 @@ proc _toolatra_server_processrequest {sock addr time} {
 				return
 			} else {
 				set countOfChars [dict get $params Content-Length]
-				for {set tms 0} {$tms < $countOfChars} {incr tms} {
-					set fdata [read $sock 1]
-					set rawData "$rawData$fdata"
-				}
+				set rawData [read $sock $countOfChars]
+				puts "Read $countOfChars bytes of data"
 			}
 		}
 		#set rawData [_toolatra_tclext_rmempty $rawData]
