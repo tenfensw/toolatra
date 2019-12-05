@@ -23,8 +23,9 @@ run
 == What does it have?
 [squares]
 - Sinatra-like syntax
-- Minimalistic templates
+- A module that provides a fully-featured template engine
 - Built-in web server that integrates easily with Nginx or Apache
+- A module for generating and validating authorization tokens
 
 == Installation
 === On macOS
@@ -223,6 +224,60 @@ get / {
 get /settoken {
 	cookie token [expr {int(rand() * 9999)}]
 }
+----
+
+Authorization example:
+
+[source,tcl]
+----
+set toolatra_auth ",(!%" ;# this is a 4-digit string that will be used to later encode the tokens that ToolatraAuth produces
+
+package require Toolatra 19.12
+package require ToolatraTemplates 19.11
+package require ToolatraAuth 19.12
+
+get / {
+	set cv [cookie authToken]
+	if {! [tokenValid $cv]} {
+		redirect /login
+	} else {
+		redirect /greet
+	}
+}
+
+get /login {
+	if {! [dict exists $params nm]} {
+		etcl form.html
+	} else {
+		set name [dict get $params nm]
+		set tkn [token $name] ;# the generated token will expire in 1 day, to specify the expiration date, specify the number of seconds as the second argument
+		cookie authToken $tkn
+		redirect /greet
+	}
+}
+
+get /greet {
+	set tkn [cookie authToken]
+	if {! [tokenValid $tkn]} {
+		redirect /login
+	} else {
+		set name [tokenValue $tkn]
+		show "Greetings, $name!"
+	}
+}
+
+run
+----
+
+where ``form.html`` is:
+
+[source,html]
+----
+<form>
+ <p>To continue, please enter your name.</p>
+ <p>Name: <input type=text name=nm /></p>
+ <button type=submit>Next</button>
+</form>
 ----
 
 == License
