@@ -1,4 +1,4 @@
-#!/usr/bin/env tclshç
+#!/usr/bin/env tclsh
 # Toolatra - Sinatra-like web microframework for Tcl 8.5/8.6
 # Copyright (C) Tim K/RoverAMD 2018-2019 <timprogrammer@rambler.ru>.
 # 
@@ -13,7 +13,7 @@ if {[lsearch -exact [info globals] toolatraIsPackaged] < 0 || ! $toolatraIsPacka
 set _toolatra_http_requesthandlers {}
 set _toolatra_http_response [dict create]
 set _toolatra_version_major 19
-set _toolatra_version_minor 11
+set _toolatra_version_minor 12
 set _toolatra_http_responsenohandle -1
 set _toolatra_http_mergeableUrlParams [dict create]
 
@@ -247,6 +247,7 @@ proc _toolatra_server_processrequest {sock addr time} {
 			}
 		}
 		#set rawData [_toolatra_tclext_rmempty $rawData]
+		set me $requestUrl
 		eval [_toolatra_http_evalrequest $requestType $requestUrl]
 		if {! [dict exists $_toolatra_http_response toolatra_ctnt]} {
 			dict set _toolatra_http_response toolatra_ctnt ""
@@ -365,11 +366,27 @@ proc header {name text} {
 	dict set _toolatra_http_response $name $text
 }
 
-proc cookie {name val} {
-	header Set-Cookie "$name=$val"
-	return $val
+proc cookie {name {val {}}} {
+	upvar params params
+	if {$val != {}} {
+		header Set-Cookie "$name=$val"
+		return $val
+	} else {
+		if {! [dict exists $params Cookie]} {
+			return {}
+		}
+		set cookiesStr [dict get $params Cookie]
+		set cookiesSplit [split $cookiesStr ";"]
+		foreach kvp $cookiesSplit {
+			set kvp [string trimleft $kvp]
+			set kvpSplit [split $kvp {=}]
+			if {[lindex $kvpSplit 0] == $name} {
+				return [join [lreplace $kvpSplit 0 0] {=}]
+			}
+		}
+		return {}
+	}
 }
-
 
 proc redirect {url} {
 	global _toolatra_http_response

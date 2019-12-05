@@ -165,10 +165,10 @@ Accessing header values:
 package require Toolatra
 
 get / {
-	if {[dict exists $params Cookie]} {
-		show [dict get $params Cookie]
+	if {[dict exists $params User-Agent]} {
+		show [dict get $params User-Agent]
 	} else {
-		cookie RandomValue [expr {rand() * 9999}]
+		show None
 	}
 }
 
@@ -206,6 +206,24 @@ get / {
 run
 ----
 
+Handling cookies:
+
+[source,tcl]
+----
+package require Toolatra 19.12
+
+get / {
+	if {[cookie token] != {}} {
+		show "Cookie 'token' is set to [cookie token]"
+	} else {
+		redirect /settoken
+	}
+}
+
+get /settoken {
+	cookie token [expr {int(rand() * 9999)}]
+}
+----
 
 == License
 As always, MIT License.
