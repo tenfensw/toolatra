@@ -5,7 +5,7 @@ if {$::env(USER) != {root}} {
 }
 
 set dirv /usr/local/lib
-set divb "$dirv/toolatra"
+set dirb "$dirv/toolatra"
 if {! [file isdirectory $dirb]} {
 	file mkdir -- $dirb
 }
