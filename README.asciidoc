@@ -130,6 +130,21 @@ Example contents of ``index.html`` (it must be located in ``templates`` folder):
 <p>Did you know that I can run Tcl code from here? Just look: 2 + 2 = @expr {2+2}@</p>
 ----
 
+Serving dynamically-generated binary data:
+
+[source,tcl]
+----
+package require Toolatra 19.12
+
+get / {
+	set binDtDesc [open a.out r]
+	fconfigure $binDtDesc -translation binary -encoding binary
+	set ctnt [read $binDtDesc]
+	close $binDtDesc
+	bshow $ctnt application/octet-stream ;# or brender
+}
+----
+
 Accessing query string parameters:
 
 [source,tcl]

@@ -268,8 +268,14 @@ proc _toolatra_server_processrequest {sock addr time} {
 			puts $sock "HTTP/1.1 200 OK"
 		}
 		set hdrs [_toolatra_server_genheaders $_toolatra_http_response]
-		foreach hdr $hdrs {
-			puts $sock $hdr
+		if {[dict exists $_toolatra_http_response X-ToolatraFramework-IsBinary] && [dict get $_toolatra_http_response X-ToolatraFramework-IsBinary]} {
+			puts $sock [join [lreplace $hdrs end end] "\n"]
+			chan configure $sock -encoding binary -translation binary -buffering none
+			puts $sock [lindex $hdrs [expr {[llength $hdrs] - 1}]]
+		} else {
+			foreach hdr $hdrs {
+				puts $sock $hdr
+			}
 		}
 	} elseif {$requestUrl == "/" && $requestType == "GET"} {
 		puts $sock "HTTP/1.1 302 Moved Temporarily"
@@ -327,6 +333,17 @@ proc show {content {mimetype {text/html; charset=utf-8}}} {
 	}
 	dict set _toolatra_http_response toolatra_ctnt "[dict get $_toolatra_http_response toolatra_ctnt]$content"
 	dict set _toolatra_http_response Content-type $mimetype
+}
+
+proc bshow {content {mimetype {application/octet-stream}}} {
+    global _toolatra_http_response
+	dict set _toolatra_http_response toolatra_ctnt $content
+	dict set _toolatra_http_response X-ToolatraFramework-IsBinary 1
+	dict set _toolatra_http_response Content-type $mimetype
+}
+
+proc brender {content {mimetype {application/octet-stream}}} {
+	bshow $content $mimetype
 }
 
 proc status {errc} {
