@@ -248,7 +248,16 @@ proc _toolatra_server_processrequest {sock addr time} {
 		}
 		#set rawData [_toolatra_tclext_rmempty $rawData]
 		set me $requestUrl
-		eval [_toolatra_http_evalrequest $requestType $requestUrl]
+		if {[catch {eval [_toolatra_http_evalrequest $requestType $requestUrl]} reason]} {
+			puts "Exception thrown, displaying an error (reason = '$reason')"
+			puts $sock "HTTP/1.1 500 Internal Server Error"
+			puts $sock "Content-type: text/html"
+			puts $sock ""
+			puts $sock [_toolatra_server_error $requestUrl "Tcl exception was thrown: \"$reason\"."]
+			close $sock
+			puts ------------------------------------------------------
+			return
+		}
 		if {! [dict exists $_toolatra_http_response toolatra_ctnt]} {
 			dict set _toolatra_http_response toolatra_ctnt ""
 		}
