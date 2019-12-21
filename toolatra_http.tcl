@@ -253,7 +253,7 @@ proc _toolatra_server_processrequest {sock addr time} {
 			puts $sock "HTTP/1.1 500 Internal Server Error"
 			puts $sock "Content-type: text/html"
 			puts $sock ""
-			puts $sock [_toolatra_server_error $requestUrl "Tcl exception was thrown: \"$reason\"."]
+			puts $sock [_toolatra_server_error $requestUrl "Tcl exception was thrown:<br><br><i>[string map [list "\r\n" "<br>" "\n" "<br>"] $::errorInfo]</i>"]
 			close $sock
 			puts ------------------------------------------------------
 			return

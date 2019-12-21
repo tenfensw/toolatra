@@ -58,8 +58,11 @@ proc _toolatra_auth_decodeToken {tkn} {
     return [base64::decode $tknDec]
 }
 
-proc token {ctnt {expires 86400}} {
+proc token {ctnt {expires -1}} {
     set finalDate [expr {[clock seconds] + $expires}]
+    if {$expires < 0} {
+        set finalDate [expr {[clock seconds] + (int(rand() * 1000) * 60 * 60 * 24)}]
+    }
     set formatted "$finalDate+$ctnt"
     return "$finalDate+[_toolatra_auth_pretifyBase [base64::encode $formatted]]"
 }
