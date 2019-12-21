@@ -168,6 +168,12 @@ proc _toolatra_tclext_rmempty {listing} {
 	return $result
 }
 
+proc _toolatra_socket_secureputs {sock what} {
+	if {[catch {puts $sock $what}]} {
+		return 0
+	}
+	return 1
+}
 
 proc _toolatra_server_processrequest {sock addr time} {
 	global _toolatra_http_response
@@ -217,13 +223,13 @@ proc _toolatra_server_processrequest {sock addr time} {
 		fconfigure $ctntTmp -translation binary -encoding binary
 		set everythingTmp [read $ctntTmp]
 		close $ctntTmp
-		puts $sock "HTTP/1.1 200 OK"
-		puts $sock "Content-type: $mimeType"
-		puts $sock "Connection: closed"
-		puts $sock "X-ToolatraFramework-FoundResource: $cwdPublic"
-		puts $sock ""
+		_toolatra_socket_secureputs $sock "HTTP/1.1 200 OK"
+		_toolatra_socket_secureputs $sock "Content-type: $mimeType"
+		_toolatra_socket_secureputs $sock "Connection: closed"
+		_toolatra_socket_secureputs $sock "X-ToolatraFramework-FoundResource: $cwdPublic"
+		_toolatra_socket_secureputs $sock ""
 		chan configure $sock -translation binary -encoding binary
-		puts $sock $everythingTmp
+		_toolatra_socket_secureputs $sock $everythingTmp
 		puts ------------------------------------------------------	
 		close $sock
 		return
@@ -250,10 +256,10 @@ proc _toolatra_server_processrequest {sock addr time} {
 		set me $requestUrl
 		if {[catch {eval [_toolatra_http_evalrequest $requestType $requestUrl]} reason]} {
 			puts "Exception thrown, displaying an error (reason = '$reason')"
-			puts $sock "HTTP/1.1 500 Internal Server Error"
-			puts $sock "Content-type: text/html"
-			puts $sock ""
-			puts $sock [_toolatra_server_error $requestUrl "Tcl exception was thrown:<br><br><i>[string map [list "\r\n" "<br>" "\n" "<br>"] $::errorInfo]</i>"]
+			_toolatra_socket_secureputs $sock "HTTP/1.1 500 Internal Server Error"
+			_toolatra_socket_secureputs $sock "Content-type: text/html"
+			_toolatra_socket_secureputs $sock ""
+			_toolatra_socket_secureputs $sock [_toolatra_server_error $requestUrl "Tcl exception was thrown:<br><br><i>[string map [list "\r\n" "<br>" "\n" "<br>"] $::errorInfo]</i>"]
 			close $sock
 			puts ------------------------------------------------------
 			return
@@ -272,35 +278,35 @@ proc _toolatra_server_processrequest {sock addr time} {
 				}
 				dict set _toolatra_http_response error $errcv
 			}
-			puts $sock "HTTP/1.1 $errcv [_toolatra_server_finderror $errcv]"
+			_toolatra_socket_secureputs $sock "HTTP/1.1 $errcv [_toolatra_server_finderror $errcv]"
 		} else {
-			puts $sock "HTTP/1.1 200 OK"
+			_toolatra_socket_secureputs $sock "HTTP/1.1 200 OK"
 		}
 		set hdrs [_toolatra_server_genheaders $_toolatra_http_response]
 		if {[dict exists $_toolatra_http_response X-ToolatraFramework-IsBinary] && [dict get $_toolatra_http_response X-ToolatraFramework-IsBinary]} {
-			puts $sock [join [lreplace $hdrs end end] "\n"]
+			_toolatra_socket_secureputs $sock [join [lreplace $hdrs end end] "\n"]
 			chan configure $sock -encoding binary -translation binary -buffering none
-			puts $sock [lindex $hdrs [expr {[llength $hdrs] - 1}]]
+			_toolatra_socket_secureputs $sock [lindex $hdrs [expr {[llength $hdrs] - 1}]]
 		} else {
 			foreach hdr $hdrs {
-				puts $sock $hdr
+				_toolatra_socket_secureputs $sock $hdr
 			}
 		}
 	} elseif {$requestUrl == "/" && $requestType == "GET"} {
-		puts $sock "HTTP/1.1 302 Moved Temporarily"
-		puts $sock "Content-type: text/plain"
-		puts $sock "X-ToolatraFramework-FirstRun: 1"
-		puts $sock "Location: http://timkoi.gitlab.io/toolatra/welcome"
-		puts $sock "URI: http://timkoi.gitlab.io/toolatra/welcome"
-		puts $sock "Connection: close"
-		puts $sock ""
-		puts $sock "If you are not being redirected, manually go to http://timkoi.gitlab.io/toolatra/welcome"
+		_toolatra_socket_secureputs $sock "HTTP/1.1 302 Moved Temporarily"
+		_toolatra_socket_secureputs $sock "Content-type: text/plain"
+		_toolatra_socket_secureputs $sock "X-ToolatraFramework-FirstRun: 1"
+		_toolatra_socket_secureputs $sock "Location: http://timkoi.gitlab.io/toolatra/welcome"
+		_toolatra_socket_secureputs $sock "URI: http://timkoi.gitlab.io/toolatra/welcome"
+		_toolatra_socket_secureputs $sock "Connection: close"
+		_toolatra_socket_secureputs $sock ""
+		_toolatra_socket_secureputs $sock "If you are not being redirected, manually go to http://timkoi.gitlab.io/toolatra/welcome"
 	} else {
 		puts "No handler for request $requestUrl ($requestType), returning an error."
-		puts $sock "HTTP/1.1 404 Not Found"
-		puts $sock "Content-type: text/html"
-		puts $sock ""
-		puts $sock [_toolatra_server_error $requestUrl "There is no handler registered for this URL."]
+		_toolatra_socket_secureputs $sock "HTTP/1.1 404 Not Found"
+		_toolatra_socket_secureputs $sock "Content-type: text/html"
+		_toolatra_socket_secureputs $sock ""
+		_toolatra_socket_secureputs $sock [_toolatra_server_error $requestUrl "There is no handler registered for this URL."]
 	}
 	close $sock
 	puts ------------------------------------------------------
