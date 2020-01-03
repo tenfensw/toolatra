@@ -28,20 +28,26 @@ proc _toolatra_template_load {relPath {context -1}} {
 	for {set index 0} {$index < [string length $contents]} {incr index} {
 		set cchar [string index $contents $index]
 		if {$cchar == "@"} {
-			if {$insideEval} {
-				set insideEval 0
-				if {[info exists $tmpEval]} {
-					set result "$result[eval "_toolatra_varpingpong \$$tmpEval"]"
-				} elseif {[string index $tmpEval 0] == {!}} {
-					set substrTmpEval [string trim [string range $tmpEval 1 end]]
-					set result "$result[layout $substrTmpEval $context]"
+			set cchar2 [string index $contents [expr $index+1]]
+                  	if {$cchar2=="@"} {
+                        	incr index ;
+                        	set result "$result@" ;
+                      	} else  {
+				if {$insideEval} {
+					set insideEval 0
+					if {[info exists $tmpEval]} {
+						set result "$result[eval "_toolatra_varpingpong \$$tmpEval"]"
+					} elseif {[string index $tmpEval 0] == {!}} {
+						set substrTmpEval [string trim [string range $tmpEval 1 end]]
+						set result "$result[layout $substrTmpEval $context]"
+					} else {
+						set result "$result[eval $tmpEval]"
+					}
+					set tmpEval ""
 				} else {
-					set result "$result[eval $tmpEval]"
+					set insideEval 1
+					set tmpEval ""
 				}
-				set tmpEval ""
-			} else {
-				set insideEval 1
-				set tmpEval ""
 			}
 		} elseif {$insideEval} {
 			set tmpEval "$tmpEval$cchar"
