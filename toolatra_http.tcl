@@ -283,6 +283,9 @@ proc _toolatra_server_processrequest {sock addr time} {
 			_toolatra_socket_secureputs $sock "HTTP/1.1 200 OK"
 		}
 		set hdrs [_toolatra_server_genheaders $_toolatra_http_response]
+		if {[lsearch -exact [info globals] toolatra_noCORSAllow] < 0 && [dict exists $params Origin]} {
+			dict set _toolatra_http_response Access-Control-Allow-Origin [dict get $params Origin]
+		}
 		if {[dict exists $_toolatra_http_response X-ToolatraFramework-IsBinary] && [dict get $_toolatra_http_response X-ToolatraFramework-IsBinary]} {
 			_toolatra_socket_secureputs $sock [join [lreplace $hdrs end end] "\n"]
 			chan configure $sock -encoding binary -translation binary -buffering none
