@@ -5,7 +5,7 @@ if {[file isdirectory $directory]} {
 }
 
 file mkdir $directory
-foreach fn {toolatra_http.tcl toolatra_templates.tcl toolatra_auth.tcl pkgIndex.tcl} {
+foreach fn {toolatra_http.tcl toolatra_templates.tcl toolatra_auth.tcl toolatra_mustache.tcl pkgIndex.tcl} {
 	file copy $fn "$directory/$fn"
 }
 

@@ -2,7 +2,7 @@ image::logo.png[]
 
 = Toolatra
 
-http://meow.roveramd.com/s/map/toolatra
+https://wiki.tcl-lang.org/page/Toolatra
 
 The simplicity of Sinatra brought to Tcl.
 
@@ -128,6 +128,26 @@ Example contents of ``index.html`` (it must be located in ``templates`` folder):
 ----
 <h1>Hello there, @name@!</h1>
 <p>Did you know that I can run Tcl code from here? Just look: 2 + 2 = @expr {2+2}@</p>
+----
+
+Speaking of templates, you don't have to use Toolatra's template engine - you can use Mustache templates if you want in a pretty similar manner (you'll need ianka's mustache.tcl library installed first, though);
+
+[source,tcl]
+----
+package require Toolatra 19.12
+package require ToolatraMustache 20.06 ;# needed for Mustache templates to work
+
+get / {
+	mustache greeter.html [dict create name Tim]
+}
+
+----
+
+Example contents of ``greeter.html.mustache`` located inside the ``templates`` folder:
+
+[source,html]
+----
+<h1>Hello again, {{name}}!</h1>
 ----
 
 Serving dynamically-generated binary data:

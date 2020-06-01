@@ -10,7 +10,7 @@ if {! [file isdirectory $dirb]} {
 	file mkdir -- $dirb
 }
 
-foreach fn {toolatra_http.tcl toolatra_auth.tcl toolatra_templates.tcl pkgIndex.tcl} {
+foreach fn {toolatra_http.tcl toolatra_auth.tcl toolatra_templates.tcl toolatra_mustache.tcl pkgIndex.tcl} {
 	file copy $fn "$dirb/$fn"
 }
 
